@@ -2,7 +2,6 @@
 
 import scapy.all as scapy # Mevzuda adamlari ipe dizecek olan arkadas
 import optparse # Input girmeleri icin bir arac
-import time
 
 def get_input_from_bebe():
 	parse_object = optparse.OptionParser() 
