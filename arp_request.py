@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import scapy.all as scapy # Mevzuda adamlari ipe dizecek olan arkadas
-import optparse # Kod bilmeyenler icin opsiyon girme zimbirtisi
+import optparse # Input girmeleri icin bir arac
 import time
 
 def get_input_from_bebe():
