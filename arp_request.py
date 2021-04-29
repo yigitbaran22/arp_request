@@ -3,7 +3,6 @@
 from tabulate import tabulate
 from scapy.all import srp, Ether, ARP, conf
 import argparse # optparse deapreciated
-import sys
 
 
 def getInput():
