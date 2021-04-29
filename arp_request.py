@@ -1,25 +1,34 @@
 #! /usr/bin/env python
 
-import scapy.all as scapy # Mevzuda adamlari ipe dizecek olan arkadas
-import optparse # Input girmeleri icin bir arac
+from tabulate import tabulate
+from scapy.all import srp, Ether, ARP, conf
+import argparse # optparse deapreciated
+import sys
 
-def get_input_from_bebe():
-	parse_object = optparse.OptionParser() 
-	parse_object.add_option("-i", "--ip", dest="ipadress", help="Arkadasim tek opsiyon var zaten -i yaz ip  yaz. Hic olmadi direk calistir default yine akar.")
 
-	(user_input,arguments)=parse_object.parse_args()
-	
-	if not user_input.ipadress:
-		print("Parametre girmedin. Alayina gidiyorum.")  #Komik olmayan komiklikler
-		user_input.ipadress = "192.168.0.1/24" #GOP Cocugu is online. Alayina sorgu.
-	return user_input
+def getInput():
+    parser = argparse.ArgumentParser(description="IP adresini configler")
+    parser.add_argument("-i", "--ip", dest="ipadress",
+                        help="Arkadasim tek opsiyon var zaten -i yaz ip  yaz. Hic olmadi direk calistir default yine akar.")
+    args = parser.parse_args()
+    if not args.ipadress:
+        print("Parametre girmedin. Alayina gidiyorum.")  # Komik olmayan komiklikler
+        args.ipadress = "192.168.0.1/24"  # GOP Cocugu is online. Alayina sorgu.
+    return args.ipadress
 
-def network_search(ip = "192.168.0.1/24"):
-	arp_request_packet = scapy.ARP(pdst = ip) #ARP sorgusu soracagimiz abiler
-	broadcast_packet = scapy.Ether(dst="ff:ff:ff:ff:ff:ff") #Modeme sen hayirdir cekme
-	combined_packet = broadcast_packet/arp_request_packet #Paketlerimizi harmanliyoruz
-	(answered, offline) = scapy.srp(combined_packet, timeout=1) #A sorguladigimiz ve bize donen elemanlar, B offline olup cevap vermeyenler.
-	answered.summary() #Insan gibi okunacak sekilde output aliyoruz.
 
-user_ipadress = get_input_from_bebe()
-network_search(user_ipadress.ipadress)
+def getTable(ip="192.168.0.1/24"):
+    ans, unans = srp(Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip),
+                     timeout=2)
+    return ans
+
+
+conf.verb = 0
+df = []
+
+for snd, rcv in getTable(getInput()):
+    df.append({rcv.sprintf(r"%Ether.src%"),
+               rcv.sprintf(r"%ARP.psrc%")
+               })
+
+print(tabulate(df, tablefmt="grid", headers=["SENDER", "RECIEVER"]))
